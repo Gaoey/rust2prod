@@ -1,3 +1,4 @@
+use std::net::TcpListener;
 // `actix_rt::test` is the testing equivalent of `actix_web::main`.
 // It also spares you from having to specify the `#[test]` attribute.
 //
@@ -9,7 +10,7 @@
 #[actix_rt::test]
 async fn health_check_works() {
     // Arrange
-    spawn_app();
+    let address = spawn_app();
     // We need to bring in `reqwest`
     // to perform HTTP requests against our application.
     //
@@ -18,7 +19,7 @@ async fn health_check_works() {
     let client = reqwest::Client::new();
     // Act
     let response = client
-        .get("http://127.0.0.1:8000/health_check")
+        .get(&format!("{}/health_check", &address))
         .send()
         .await
         .expect("Failed to execute request.");
@@ -32,12 +33,15 @@ async fn health_check_works() {
 // We are also running tests, so it is not worth it to propagate errors:
 // if we fail to perform the required setup we can just panic and crash
 // all the things.
-fn spawn_app() {
-    let server = zero2prod::run().expect("Failed to bind address");
+fn spawn_app() -> String {
+    let listener = TcpListener::bind("127.0.0.1:0").expect("Failed to bind random port");
+    let port = listener.local_addr().unwrap().port();
+    let server = zero2prod::run(listener).expect("Failed to bind address");
     // Launch the server as a background task
     // tokio::spawn returns a handle to the spawned future,
     // but we have no use for it here, hence the non-binding let
     //
     // New dev dependency - let's add tokio to the party with // `cargo add tokio --dev --vers 1`
     let _ = tokio::spawn(server);
+    format!("http://127.0.0.1:{}", port)
 }
