@@ -10,4 +10,5 @@ ENV SQLX_OFFLINE true
 RUN rustup default nightly   
 RUN cargo build --release
 # When `docker run` is executed, launch the binary!
+ENV APP_ENVIRONMENT production
 ENTRYPOINT ["./target/release/zero2prod"]
