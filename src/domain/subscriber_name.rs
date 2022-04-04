@@ -56,12 +56,14 @@ mod tests {
         let name = " ".to_string();
         assert_err!(SubscriberName::parse(name));
     }
+
     #[test]
     fn empty_string_is_rejected() {
         let name = "".to_string();
         assert_err!(SubscriberName::parse(name));
     }
 
+    #[test]
     fn names_containing_an_invalid_character_are_rejected() {
         for name in &['/', '(', ')', '"', '<', '>', '\\', '{', '}'] {
             let name = name.to_string();

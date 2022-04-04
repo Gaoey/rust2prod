@@ -46,7 +46,7 @@ impl DatabaseSettings {
         self.without_db().database(&self.database_name)
     }
 }
-
+#[derive(Debug)]
 pub enum Environment {
     Local,
     Production,
@@ -98,7 +98,8 @@ pub fn get_configuration() -> Result<Settings, config::ConfigError> {
         config::File::from(configuration_directory.join(environment.as_str())).required(true),
     )?;
 
-    settings.merge(config::Environment::with_prefix("app").separator("__"))?;
+    // TRY APP_APPLICATION_PORT=9000 make run
+    settings.merge(config::Environment::with_prefix("app").separator("_"))?;
     // Try to convert the configuration values it read into
     // our Settings type
     settings.try_into()
